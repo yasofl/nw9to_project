@@ -1,0 +1,39 @@
+name: Build Flutter APK from ZIP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install unzip
+        run: sudo apt-get install unzip -y
+
+      - name: Extract ZIP
+        run: unzip nw9to_project_supabase_email_full_v2_cleaned.zip -d project
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'   # غيّرها لو مشروعك مبني على نسخة Flutter ثانية
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: cd project && flutter pub get
+
+      - name: Build APK
+        run: cd project && flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-apk
+          path: project/build/app/outputs/flutter-apk/app-release.apk
